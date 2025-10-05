@@ -1,0 +1,99 @@
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 10m
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${APP_COOKIE_SECURE:false}
+  compression:
+    enabled: true
+    min-response-size: 1KB
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 21MB
+  mail:
+    host: localhost
+    port: 1025
+    properties:
+      mail.smtp.connectiontimeout: 3000
+      mail.smtp.timeout: 3000
+      mail.smtp.writetimeout: 3000
+  application:
+    name: deadlinr-backend
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:deadlinr}
+    username: ${DB_USERNAME:deadlinr}
+    password: ${DB_PASSWORD:deadlinr}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    # Existing dev databases were created by Hibernate before Flyway existed.
+    # Baseline them at version 1 so V2+ applies; fresh databases run V1 + V2.
+    baseline-on-migrate: true
+    baseline-version: 1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  prometheus:
+    metrics:
+      export:
+        enabled: ${app.features.observability:true}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: ${app.features.api-docs:true}
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: ${app.features.api-docs:true}
+
+app:
+  oauth:
+    enabled: ${APP_OAUTH_ENABLED:false}
+    public-url: ${APP_PUBLIC_URL:http://localhost:3000}
+    google-client-id: ${GOOGLE_CLIENT_ID:}
+    google-client-secret: ${GOOGLE_CLIENT_SECRET:}
+    github-client-id: ${GITHUB_CLIENT_ID:}
+    github-client-secret: ${GITHUB_CLIENT_SECRET:}
+  features:
+    api-docs: true
+    refresh-tokens: true
+    login-rate-limit: true
+    observability: true
+  jwt:
+    # Secret must be at least 256 bits (32 bytes) for HS256. Override in production!
+    secret: ${JWT_SECRET:deadlinr-dev-secret-key-change-me-0123456789abcdef0123456789abcdef}
+    # Access token lifetime in ms (default: 15 minutes)
+    access-expiration: ${JWT_ACCESS_EXPIRATION:900000}
+    # Refresh token lifetime in ms (default: 7 days)
+    refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+  cors:
+    # Comma-separated origin patterns. Cookies require allowCredentials, so a
+    # plain "*" is not possible; patterns are the supported alternative. The
+    # dev default covers localhost/LAN on any port. Production should restrict
+    # this to exact origins, e.g. https://app.example.com
+    allowed-origin-patterns: ${APP_CORS_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*,http://[::1]:*,http://192.168.*:*,http://10.*:*}
+  cookies:
+    # Set to true behind HTTPS (production)
+    secure: ${APP_COOKIE_SECURE:false}
+  rate-limit:
+    login:
+      capacity: ${LOGIN_RATE_CAPACITY:5}
+      refill-minutes: ${LOGIN_RATE_REFILL_MINUTES:1}
