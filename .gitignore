@@ -1,0 +1,45 @@
+# Backend
+backend/target/
+*.class
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Env / secrets
+.env
+.env.local
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local attachment storage
+backend/data/
+/data/
+
+# Generated browser evidence and session files
+frontend/test-results/
+frontend/playwright-report/
+frontend/e2e/.auth/
+*.tsbuildinfo
+
+# Local environment overrides; keep blank templates versioned
+.env.*
+!.env.example
+!**/.env.example
+
+# Local backups
+/backup*.sql
+*.dump
+
+# Tooling / local state
+.commandcode/
+frontend/.next*
+
