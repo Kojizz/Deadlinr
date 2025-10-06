@@ -1,0 +1,1 @@
+export default function Loading(){return <div role="status" aria-label="Loading today's plan" className="workspace"><div className="skeleton mb-6 h-12 w-48"/><div className="skeleton h-64 rounded-xl"/></div>;}
