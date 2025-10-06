@@ -1,0 +1,9 @@
+/* Inherit the parent's tokens instead of creating same-element var() cycles. */
+.bn-shadcn,.bn-shadcn.dark {
+  --background:inherit; --foreground:inherit; --card:inherit; --card-foreground:inherit;
+  --popover:inherit; --popover-foreground:inherit; --primary:inherit; --primary-foreground:inherit;
+  --secondary:inherit; --secondary-foreground:inherit; --muted:inherit; --muted-foreground:inherit;
+  --accent:inherit; --accent-foreground:inherit; --destructive:inherit; --destructive-foreground:inherit;
+  --border:inherit; --input:inherit; --ring:inherit; --radius:inherit;
+}
+.bn-shadcn .bn-editor { background:transparent; padding-inline:0; }

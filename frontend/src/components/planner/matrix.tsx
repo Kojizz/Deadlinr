@@ -1,0 +1,24 @@
+"use client";
+import {keys} from "@/lib/query-keys";
+import {useState} from "react";
+import {useQuery} from "@tanstack/react-query";
+import {api} from "@/lib/api";
+import {useWorkUpdate} from "@/hooks/use-work";
+import {type WorkItem,openWork,dueLabel} from "@/lib/work";
+import {Modal,PriorityPill} from "@/components/ui/workspace";
+import {DeadlinePicker} from "./date-picker";
+type Quadrant="doFirst"|"schedule"|"keepShort"|"considerLater";
+type MatrixData=Record<Quadrant,{count:number;items:WorkItem[]}>;
+const LABELS:Record<Quadrant,string>={doFirst:"Do first",schedule:"Schedule",keepShort:"Keep short",considerLater:"Consider later"};
+const IMPORTANT:Record<Quadrant,boolean>={doFirst:true,schedule:true,keepShort:false,considerLater:false};
+const URGENT:Record<Quadrant,boolean>={doFirst:true,schedule:false,keepShort:true,considerLater:false};
+const EMPTY:MatrixData={doFirst:{count:0,items:[]},schedule:{count:0,items:[]},keepShort:{count:0,items:[]},considerLater:{count:0,items:[]}};
+export default function Matrix(){
+ const settings=useQuery({queryKey:keys.settings(),queryFn:()=>api.get<{urgentDays:number}>("/settings"),staleTime:60_000}),update=useWorkUpdate(),[move,setMove]=useState<{w:WorkItem;important:boolean;urgent:boolean}|null>(null),[date,setDate]=useState<string|null>(null);
+ const days=settings.data?.urgentDays??2;
+ const list=useQuery({queryKey:[...keys.work.matrix(),days],queryFn:()=>api.get<MatrixData>("/matrix?urgentDays="+days)});
+ const groups=list.data??EMPTY,allItems=(Object.keys(LABELS) as Quadrant[]).flatMap(k=>groups[k].items);
+ const cutoff=Date.now()+days*86400000,urgent=(w:WorkItem)=>!!w.dueAt&&new Date(w.dueAt).getTime()<=cutoff;
+ function transfer(w:WorkItem,important:boolean,targetUrgent:boolean){if(w.hardDeadline&&!important){window.alert("Hard deadlines stay important. Edit the item to remove its hard deadline flag.");return;}if(urgent(w)!==targetUrgent){setMove({w,important,urgent:targetUrgent});setDate(w.dueAt);}else update.mutate({id:w.id,patch:{priority:important?Math.min(2,w.priority):Math.max(3,w.priority),version:w.version}});}
+ return <section className="workspace"><div className="page-heading"><div><p className="eyebrow">Focus and decisions</p><h1>Priority matrix</h1><p className="text-sm text-muted-foreground">Urgent = due within {days} days. Drag an item or use its Move menu.</p></div></div>{list.isError&&<p role="alert">Could not load the matrix.</p>}<div className="grid md:grid-cols-2 gap-4">{(Object.keys(LABELS) as Quadrant[]).map(key=><section key={key} className="panel p-4 min-h-52" onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const w=allItems.find(it=>it.id===Number(e.dataTransfer.getData("text/plain")));if(w)transfer(w,IMPORTANT[key],URGENT[key]);}}><h2 className="font-semibold">{LABELS[key]} <span className="text-xs font-normal text-muted-foreground">{groups[key].count}</span></h2><p className="text-xs text-muted-foreground mb-4">{IMPORTANT[key]?"Important":"Less important"} · {URGENT[key]?"Urgent":"Not urgent"}</p>{groups[key].items.map(w=><div draggable onDragStart={e=>e.dataTransfer.setData("text/plain",String(w.id))} className="list-row" key={w.id}><div className="min-w-0 flex-1"><button className="text-left text-sm font-medium" onClick={()=>openWork(w.id)}>{w.title}</button><p className="text-xs text-muted-foreground">{dueLabel(w.dueAt)}</p></div><PriorityPill priority={w.priority}/><select className="row-select max-w-24" aria-label={"Move "+w.title} value="" onChange={e=>{const v=e.target.value.split(",");const target=(Object.keys(LABELS) as Quadrant[]).find(k=>String(IMPORTANT[k]?1:0)===v[0]&&String(URGENT[k]?1:0)===v[1]);if(target)transfer(w,IMPORTANT[target],URGENT[target]);}}><option value="">Move…</option><option value="1,1">Do first</option><option value="1,0">Schedule</option><option value="0,1">Keep short</option><option value="0,0">Consider later</option></select></div>)}{groups[key].count>groups[key].items.length&&<p className="px-3 py-2 text-xs text-muted-foreground">Showing first {groups[key].items.length} of {groups[key].count} — see the Tasks page for the rest.</p>}</section>)}</div><Modal open={!!move} title="Choose the new deadline" onClose={()=>setMove(null)}><p className="text-sm mb-4">Choose a date {move?.urgent?"within":"beyond"} the next {days} days{!move?.urgent?", or clear the date":""}.</p><DeadlinePicker value={date} onChange={setDate}/><button className="btn btn-primary mt-4" disabled={!move||((!!date&&new Date(date).getTime()<=cutoff)!==move.urgent)} onClick={async()=>{if(!move)return;try{await update.mutateAsync({id:move.w.id,patch:{priority:move.important?Math.min(2,move.w.priority):Math.max(3,move.w.priority),dueAt:date,version:move.w.version}});setMove(null);}catch{}}}>Move item</button></Modal></section>;
+}
