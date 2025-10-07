@@ -1,0 +1,37 @@
+# Deadlinr export
+
+Exported: 2026-10-12T05:00:00Z
+
+Readable copy. Use JSON to preserve all fields, document blocks and attachment bytes.
+
+## Tasks
+
+- [ ] Report, "Databases"
+  - ID: bf857672\-8826\-48f1\-92d2\-803841e81681:work:1
+  - Status: IN\_PROGRESS · Priority: P1
+  - dueAt: 2026\-10\-16T13:00:00Z
+  - startAt: 2026\-10\-15T04:00:00Z
+  - timeZone: Asia/Qyzylorda
+  - documentId: bf857672\-8826\-48f1\-92d2\-803841e81681:document:1
+  - repeatRule: NONE
+  - Labels: \["uni","work"\]
+    Review the rubric\.
+    Write the final report — résumé 📚\.
+
+- [ ] =SUM\(1,2\) is text, not a formula
+  - ID: bf857672\-8826\-48f1\-92d2\-803841e81681:work:2
+  - Status: TODO · Priority: P3
+  - dueAt: 2026\-11\-01T05:30:00Z
+  - timeZone: America/New\_York
+  - parentId: bf857672\-8826\-48f1\-92d2\-803841e81681:work:1
+  - repeatRule: NONE
+    A CSV safety example\.
+
+## Documents
+
+### Database report notes
+
+ID: bf857672\-8826\-48f1\-92d2\-803841e81681:document:1
+
+Explain indexing with an example\.
+
