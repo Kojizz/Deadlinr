@@ -1,0 +1,7 @@
+import {test,expect} from "./fixtures";
+test("G5 Critical, P1 filter, move warning, notifications and matrix",async({page})=>{
+ const response=await page.request.post("/api/work-items",{data:{title:"G5 hard deadline",priority:1,hardDeadline:true,dueAt:new Date(Date.now()-1000).toISOString(),reminderMinutes:[]}});expect(response.ok()).toBeTruthy();const w=await response.json();
+ await page.request.post("/api/work-items",{data:{title:"G5 low priority",priority:4}});await page.goto("/assignments");await expect(page.getByRole("button",{name:/Critical/})).toBeVisible();await page.getByLabel("Filter P1").check();await expect(page.getByRole("button",{name:"G5 low priority",exact:true})).toHaveCount(0);await expect(page).toHaveURL(/priorities=1/);
+ await page.getByLabel("Due date of G5 hard deadline",{exact:true}).click();page.once("dialog",d=>d.dismiss());await page.getByRole("button",{name:"Tomorrow",exact:true}).click();await expect.poll(async()=>(await (await page.request.get("/api/work-items/"+w.id)).json()).dueAt).toBe(w.dueAt);await page.keyboard.press("Escape");
+ await page.getByRole("button",{name:"Notifications",exact:true}).click();await expect(page.getByText("Critical · Hard deadline escalation",{exact:true})).toBeVisible({timeout:25000});await page.getByRole("button",{name:"Close dialog",exact:true}).click();await page.goto("/matrix");await expect(page.getByRole("heading",{name:"Do first",exact:true})).toBeVisible();await expect(page.getByRole("button",{name:"G5 hard deadline",exact:true})).toBeVisible();
+});
