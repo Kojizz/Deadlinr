@@ -30,5 +30,5 @@ export function formatDateTime(value: string | number | Date, timeZone?: string)
 // displayed instant (including historical/DST changes), without altering it.
 export function formatUtcOffset(value:string|number|Date,timeZone:string):string {
  const part=new Intl.DateTimeFormat("en-US",{timeZone,timeZoneName:"shortOffset"}).formatToParts(toDate(value)).find(p=>p.type==="timeZoneName");
- return part?.value.replace(/^GMT/,"UTC")??timeZone;
+ return part?.value.replace(/^GMT/,"UTC").replace(/^UTC[+-]0+(?::0+)?$/,"UTC")??timeZone;
 }

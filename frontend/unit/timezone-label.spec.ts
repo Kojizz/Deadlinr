@@ -11,3 +11,18 @@ for(const [zone,date,label] of [
 ])test(`offset at the deadline: ${zone} ${date}`,()=>{
  const instant=new Date(date);expect(formatUtcOffset(instant,zone)).toBe(label);expect(instant.toISOString()).toBe(date.replace("Z",".000Z"));
 });
+
+// ICU versions differ in how they spell a zero offset on Windows and Linux.
+for(const raw of ["GMT","GMT+0","GMT-0","GMT+00:00"])test(`zero offset is stable when Intl returns ${raw}`,()=>{
+ const original=Intl.DateTimeFormat;
+ Intl.DateTimeFormat=new Proxy(original,{construct(target,args){
+  const formatter=Reflect.construct(target,args);
+  Object.defineProperty(formatter,"formatToParts",{value:()=>[{type:"timeZoneName",value:raw}]});
+  return formatter;
+ }});
+ try{
+  const instant=new Date("2026-10-16T13:00:00Z");
+  expect(formatUtcOffset(instant,"UTC")).toBe("UTC");
+  expect(instant.toISOString()).toBe("2026-10-16T13:00:00.000Z");
+ }finally{Intl.DateTimeFormat=original;}
+});
