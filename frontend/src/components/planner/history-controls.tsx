@@ -1,0 +1,13 @@
+"use client";
+import {keys} from "@/lib/query-keys";
+import {useEffect,useState} from "react";
+import {useQuery} from "@tanstack/react-query";
+import {api} from "@/lib/api";
+import {useRefreshWorkspace} from "@/hooks/use-workspace";
+import {useToast,Modal} from "@/components/ui/workspace";
+export function HistoryControls(){const refresh=useRefreshWorkspace(),toast=useToast(),[busy,setBusy]=useState(false),[help,setHelp]=useState(false);const history=useQuery({queryKey:keys.workspace.history(),queryFn:()=>api.get<{canUndo:boolean;canRedo:boolean}>("/history")});
+ async function apply(redo:boolean){if(busy)return;setBusy(true);try{await api.post("/history/"+(redo?"redo":"undo"));await refresh();toast({message:redo?"Action redone":"Action undone"});}catch(e){toast({message:String(e)});}finally{setBusy(false);}}
+ useEffect(()=>{const key=(e:KeyboardEvent)=>{const el=e.target as HTMLElement;if(el?.matches("input,textarea,select")||el?.isContentEditable)return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"&&!document.querySelector("dialog[open]")){e.preventDefault();void apply(e.shiftKey);}if(e.key==="?"&&!document.querySelector("dialog[open]")){e.preventDefault();setHelp(true);}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key);});
+ return <><div className="flex gap-1"><button className="btn" aria-label="Undo last task action" disabled={busy||!history.data?.canUndo} onClick={()=>void apply(false)}>↶ Undo</button><button className="btn" aria-label="Redo last task action" disabled={busy||!history.data?.canRedo} onClick={()=>void apply(true)}>↷ Redo</button><button className="btn" aria-label="Keyboard shortcuts" onClick={()=>setHelp(true)}>?</button></div><Modal open={help} title="Keyboard shortcuts" onClose={()=>setHelp(false)}><dl className="grid grid-cols-2 gap-3 text-sm"><dt>N</dt><dd>New task or event</dd><dt>Ctrl/⌘ K · Q</dt><dd>Natural-language quick add (also Ctrl/⌘ Shift A)</dd><dt>Ctrl/⌘ Shift K</dt><dd>Search and commands</dd><dt>On a focused task row</dt><dd>T today · M tomorrow · D date · E edit · 1–4 priority · Delete archive</dd><dt>Alt ↑ in manual sort</dt><dd>Move task up</dd><dt>Ctrl/⌘ Z / Shift Z</dt><dd>Undo / redo task changes, creates and bulk edits</dd><dt>Ctrl/⌘ Alt C</dt><dd>Code block in document body</dd><dt>Ctrl/⌘ Alt 0</dt><dd>Paragraph in document body</dd><dt>?</dt><dd>This help</dd></dl><p className="text-xs text-muted-foreground mt-5">Text fields keep their native undo. Document formatting shortcuts apply only in the editor body; AltGr keeps typing normally. Files, permanent deletion, dependencies and settings use their own controls.</p></Modal></>;
+}
+
