@@ -1,0 +1,1 @@
+export default function RouteLoading(){return <div className="workspace"><div className="page-heading"><div><div className="skeleton h-3 w-24 rounded"/><div className="skeleton mt-3 h-7 w-56 rounded"/></div><div className="skeleton h-9 w-28 rounded"/></div><div className="skeleton h-[50vh] rounded-xl"/></div>;}
