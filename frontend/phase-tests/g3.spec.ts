@@ -1,0 +1,20 @@
+import {test,expect} from "./fixtures";
+test("G3 create task with calendar popover synchronizes Today, Assignments and Calendar",async({page})=>{
+ await page.goto("/today");
+ await page.locator("header").getByRole("button",{name:"New",exact:true}).click();
+ const dialog=page.getByRole("dialog",{name:"New task",exact:true});
+ await dialog.getByRole("textbox",{name:"Title",exact:true}).fill("Calendar integration task");
+ await dialog.getByRole("button",{name:"Due date",exact:true}).click();
+ const picker=page.getByRole("dialog",{name:"Choose due date",exact:true});
+ await picker.getByRole("button",{name:"Today",exact:true}).click();
+ await picker.getByRole("button",{name:"Done",exact:true}).click();
+ await dialog.getByRole("button",{name:"Create task",exact:true}).click();
+ await expect(dialog).not.toBeVisible();
+ await expect(page.locator("main").getByRole("button",{name:/Calendar integration task/})).toBeVisible();
+ await page.getByRole("navigation",{name:"Workspace",exact:true}).getByRole("link",{name:/Assignments/}).click();
+ await expect(page.locator("main").getByRole("button",{name:/Calendar integration task/})).toBeVisible();
+ await page.getByRole("navigation",{name:"Workspace",exact:true}).getByRole("link",{name:/Calendar/}).click();
+ await expect(page.locator(".fc-event").filter({hasText:"Calendar integration task"})).toBeVisible();
+ await page.locator(".fc-event").filter({hasText:"Calendar integration task"}).click();
+ await expect(page.getByRole("dialog",{name:"Item details",exact:true})).toBeVisible();
+});
