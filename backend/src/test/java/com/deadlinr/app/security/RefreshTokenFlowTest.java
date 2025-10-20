@@ -165,12 +165,13 @@ class RefreshTokenFlowTest {
 
     @Test
     void requestId_isEchoedOrGenerated() throws Exception {
-        mockMvc.perform(get("/actuator/health").header(RequestIdFilter.HEADER, "trace-123"))
+        // Correlation IDs must not depend on the health of an external SMTP server.
+        mockMvc.perform(get("/api/auth/oauth2/providers").header(RequestIdFilter.HEADER, "trace-123"))
                 .andExpect(status().isOk())
                 .andExpect(result -> assertThat(result.getResponse().getHeader(RequestIdFilter.HEADER))
                         .isEqualTo("trace-123"));
 
-        mockMvc.perform(get("/actuator/health"))
+        mockMvc.perform(get("/api/auth/oauth2/providers"))
                 .andExpect(status().isOk())
                 .andExpect(result -> assertThat(result.getResponse().getHeader(RequestIdFilter.HEADER))
                         .isNotBlank());
