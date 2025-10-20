@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Deadlinr Local" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="deadlinr-backend" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.deadlinr.app.DeadlinrApplication" />
+    <option name="VM_PARAMETERS" value="-Dspring.config.import=optional:file:backend/.env.local[.properties]" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
