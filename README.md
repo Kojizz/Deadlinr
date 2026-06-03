@@ -90,6 +90,20 @@ The first dependency/image download needs internet. Once cached, the core local
 app works offline. PostgreSQL uses port **5433** to coexist with a native database.
 Database and attachment volumes persist between container restarts.
 
+### Local service links
+
+| Service | Default address | Purpose |
+| --- | --- | --- |
+| Web app | [localhost:3000](http://localhost:3000) | Tasks, pages and planning views |
+| API documentation | [localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) | Explore the backend endpoints |
+| Backend health | [localhost:8080/actuator/health](http://localhost:8080/actuator/health) | Check backend availability |
+| Mailpit | [localhost:8025](http://localhost:8025) | Read locally captured reminder emails |
+| Prometheus | [localhost:9090](http://localhost:9090) | Inspect collected metrics |
+| Grafana | [localhost:3001](http://localhost:3001) | View monitoring dashboards |
+
+Mailpit and monitoring pages require their Compose services to be running.
+Compose port overrides are configured in the root `.env` file.
+
 ### Native development and IntelliJ
 
 Start the dependencies with `docker compose up -d`. Import `backend/pom.xml` into
