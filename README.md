@@ -171,6 +171,22 @@ without repository access. Social sign-in needs internet. Existing password
 accounts keep local sign-in; a new provider-only account needs its provider for
 the next fresh login.
 
+## Choose an export format
+
+Open **Settings → Data**, choose a format and review the record count before
+selecting **Download export**.
+
+| Format | Best for | Contents |
+| --- | --- | --- |
+| JSON | A portable workspace snapshot | Tasks with stable IDs, optional pages and embedded attachment files |
+| CSV | Spreadsheet analysis | Tasks; text is escaped for spreadsheet use |
+| Markdown | Reading or sharing notes | Task checklists and optional page text |
+
+Completed tasks are included. Enable **Include trash** to include deleted records.
+Calendar events are excluded from exports. Only JSON can embed attachment files.
+See the sample [JSON](samples/deadlinr-export-v1.json),
+[CSV](samples/deadlinr-tasks.csv) and [readable output](samples/deadlinr-readable.txt).
+
 ## Commands and checks
 
 Run frontend commands from `frontend/`:
